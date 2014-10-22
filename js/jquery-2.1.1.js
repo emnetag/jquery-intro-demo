@@ -636,7 +636,7 @@ var i,
 	// Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
 	attributes = "\\[" + whitespace + "*(" + characterEncoding + ")(?:" + whitespace +
 		// Operator (capture 2)
-		"*([*^$|!~]?=)" + whitespace +
+		"*([*^jQuery|!~]?=)" + whitespace +
 		// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
 		"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace +
 		"*\\]",
@@ -652,7 +652,7 @@ var i,
 		")\\)|)",
 
 	// Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
-	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g" ),
+	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+jQuery", "g" ),
 
 	rcomma = new RegExp( "^" + whitespace + "*," + whitespace + "*" ),
 	rcombinators = new RegExp( "^" + whitespace + "*([>+~]|" + whitespace + ")" + whitespace + "*" ),
@@ -660,7 +660,7 @@ var i,
 	rattributeQuotes = new RegExp( "=" + whitespace + "*([^\\]'\"]*?)" + whitespace + "*\\]", "g" ),
 
 	rpseudo = new RegExp( pseudos ),
-	ridentifier = new RegExp( "^" + identifier + "$" ),
+	ridentifier = new RegExp( "^" + identifier + "jQuery" ),
 
 	matchExpr = {
 		"ID": new RegExp( "^#(" + characterEncoding + ")" ),
@@ -671,11 +671,11 @@ var i,
 		"CHILD": new RegExp( "^:(only|first|last|nth|nth-last)-(child|of-type)(?:\\(" + whitespace +
 			"*(even|odd|(([+-]|)(\\d*)n|)" + whitespace + "*(?:([+-]|)" + whitespace +
 			"*(\\d+)|))" + whitespace + "*\\)|)", "i" ),
-		"bool": new RegExp( "^(?:" + booleans + ")$", "i" ),
+		"bool": new RegExp( "^(?:" + booleans + ")jQuery", "i" ),
 		// For use in libraries implementing .is()
 		// We use this for POS matching in `select`
 		"needsContext": new RegExp( "^" + whitespace + "*[>+~]|:(even|odd|eq|gt|lt|nth|first|last)(?:\\(" +
-			whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|$)", "i" )
+			whitespace + "*((?:-\\d)?\\d*)" + whitespace + "*\\)|)(?=[^-]|jQuery)", "i" )
 	},
 
 	rinputs = /^(?:input|select|textarea|button)$/i,
@@ -809,7 +809,7 @@ function Sizzle( selector, context, results, seed ) {
 				groups = tokenize( selector );
 
 				if ( (old = context.getAttribute("id")) ) {
-					nid = old.replace( rescape, "\\$&" );
+					nid = old.replace( rescape, "\\jQuery&" );
 				} else {
 					context.setAttribute( "id", nid );
 				}
@@ -1173,11 +1173,11 @@ setDocument = Sizzle.setDocument = function( node ) {
 			div.innerHTML = "<select msallowclip=''><option selected=''></option></select>";
 
 			// Support: IE8, Opera 11-12.16
-			// Nothing should be selected when empty strings follow ^= or $= or *=
+			// Nothing should be selected when empty strings follow ^= or jQuery= or *=
 			// The test attribute must be unknown in Opera but "safe" for WinRT
 			// http://msdn.microsoft.com/en-us/library/ie/hh465388.aspx#attribute_section
 			if ( div.querySelectorAll("[msallowclip^='']").length ) {
-				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
+				rbuggyQSA.push( "[*^jQuery]=" + whitespace + "*(?:''|\"\")" );
 			}
 
 			// Support: IE8
@@ -1204,7 +1204,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 			// Support: IE8
 			// Enforce case-sensitivity of name attribute
 			if ( div.querySelectorAll("[name=d]").length ) {
-				rbuggyQSA.push( "name" + whitespace + "*[*^$|!~]?=" );
+				rbuggyQSA.push( "name" + whitespace + "*[*^jQuery|!~]?=" );
 			}
 
 			// FF 3.5 - :enabled/:disabled and hidden elements (hidden elements are still enabled)
@@ -1615,7 +1615,7 @@ Expr = Sizzle.selectors = {
 			var pattern = classCache[ className + " " ];
 
 			return pattern ||
-				(pattern = new RegExp( "(^|" + whitespace + ")" + className + "(" + whitespace + "|$)" )) &&
+				(pattern = new RegExp( "(^|" + whitespace + ")" + className + "(" + whitespace + "|jQuery)" )) &&
 				classCache( className, function( elem ) {
 					return pattern.test( typeof elem.className === "string" && elem.className || typeof elem.getAttribute !== strundefined && elem.getAttribute("class") || "" );
 				});
@@ -1638,7 +1638,7 @@ Expr = Sizzle.selectors = {
 					operator === "!=" ? result !== check :
 					operator === "^=" ? check && result.indexOf( check ) === 0 :
 					operator === "*=" ? check && result.indexOf( check ) > -1 :
-					operator === "$=" ? check && result.slice( -check.length ) === check :
+					operator === "jQuery=" ? check && result.slice( -check.length ) === check :
 					operator === "~=" ? ( " " + result + " " ).indexOf( check ) > -1 :
 					operator === "|=" ? result === check || result.slice( 0, check.length + 1 ) === check + "-" :
 					false;
@@ -2668,7 +2668,7 @@ jQuery.fn.extend({
 			jQuery.find( selector, self[ i ], ret );
 		}
 
-		// Needed because $( selector, context ) becomes $( context ).find( selector )
+		// Needed because jQuery( selector, context ) becomes jQuery( context ).find( selector )
 		ret = this.pushStack( len > 1 ? jQuery.unique( ret ) : ret );
 		ret.selector = this.selector ? this.selector + " " + selector : selector;
 		return ret;
@@ -2684,7 +2684,7 @@ jQuery.fn.extend({
 			this,
 
 			// If this is a positional/relative selector, check membership in the returned set
-			// so $("p:first").is("p:last") won't return true for a doc with two "p".
+			// so jQuery("p:first").is("p:last") won't return true for a doc with two "p".
 			typeof selector === "string" && rneedsContext.test( selector ) ?
 				jQuery( selector ) :
 				selector || [],
@@ -2708,7 +2708,7 @@ var rootjQuery,
 	init = jQuery.fn.init = function( selector, context ) {
 		var match, elem;
 
-		// HANDLE: $(""), $(null), $(undefined), $(false)
+		// HANDLE: jQuery(""), jQuery(null), jQuery(undefined), jQuery(false)
 		if ( !selector ) {
 			return this;
 		}
@@ -2726,7 +2726,7 @@ var rootjQuery,
 			// Match html or make sure no context is specified for #id
 			if ( match && (match[1] || !context) ) {
 
-				// HANDLE: $(html) -> $(array)
+				// HANDLE: jQuery(html) -> jQuery(array)
 				if ( match[1] ) {
 					context = context instanceof jQuery ? context[0] : context;
 
@@ -2738,7 +2738,7 @@ var rootjQuery,
 						true
 					) );
 
-					// HANDLE: $(html, props)
+					// HANDLE: jQuery(html, props)
 					if ( rsingleTag.test( match[1] ) && jQuery.isPlainObject( context ) ) {
 						for ( match in context ) {
 							// Properties of context are called as methods if possible
@@ -2754,7 +2754,7 @@ var rootjQuery,
 
 					return this;
 
-				// HANDLE: $(#id)
+				// HANDLE: jQuery(#id)
 				} else {
 					elem = document.getElementById( match[2] );
 
@@ -2771,23 +2771,23 @@ var rootjQuery,
 					return this;
 				}
 
-			// HANDLE: $(expr, $(...))
+			// HANDLE: jQuery(expr, jQuery(...))
 			} else if ( !context || context.jquery ) {
 				return ( context || rootjQuery ).find( selector );
 
-			// HANDLE: $(expr, context)
-			// (which is just equivalent to: $(context).find(expr)
+			// HANDLE: jQuery(expr, context)
+			// (which is just equivalent to: jQuery(context).find(expr)
 			} else {
 				return this.constructor( context ).find( selector );
 			}
 
-		// HANDLE: $(DOMElement)
+		// HANDLE: jQuery(DOMElement)
 		} else if ( selector.nodeType ) {
 			this.context = this[0] = selector;
 			this.length = 1;
 			return this;
 
-		// HANDLE: $(function)
+		// HANDLE: jQuery(function)
 		// Shortcut for document ready
 		} else if ( jQuery.isFunction( selector ) ) {
 			return typeof rootjQuery.ready !== "undefined" ?
@@ -3412,7 +3412,7 @@ jQuery.ready.promise = function( obj ) {
 
 		readyList = jQuery.Deferred();
 
-		// Catch cases where $(document).ready() is called after the browser event has already occurred.
+		// Catch cases where jQuery(document).ready() is called after the browser event has already occurred.
 		// we once tried to use readyState "interactive" here, but it caused issues like the one
 		// discovered by ChrisS here: http://bugs.jquery.com/ticket/12282#comment:15
 		if ( document.readyState === "complete" ) {
@@ -4195,7 +4195,7 @@ jQuery.event = {
 			special = jQuery.event.special[ type ] || {};
 			type = ( selector ? special.delegateType : special.bindType ) || type;
 			handlers = events[ type ] || [];
-			tmp = tmp[2] && new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" );
+			tmp = tmp[2] && new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|jQuery)" );
 
 			// Remove matching events
 			origCount = j = handlers.length;
@@ -4271,7 +4271,7 @@ jQuery.event = {
 		event.isTrigger = onlyHandlers ? 2 : 3;
 		event.namespace = namespaces.join(".");
 		event.namespace_re = event.namespace ?
-			new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)" ) :
+			new RegExp( "(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|jQuery)" ) :
 			null;
 
 		// Clean up the event in case it is being reused
@@ -5511,7 +5511,7 @@ function defaultDisplay( nodeName ) {
 }
 var rmargin = (/^margin/);
 
-var rnumnonpx = new RegExp( "^(" + pnum + ")(?!px)[a-z%]+$", "i" );
+var rnumnonpx = new RegExp( "^(" + pnum + ")(?!px)[a-z%]+jQuery", "i" );
 
 var getStyles = function( elem ) {
 		return elem.ownerDocument.defaultView.getComputedStyle( elem, null );
@@ -5697,7 +5697,7 @@ var
 	// swappable if display is none or starts with table except "table", "table-cell", or "table-caption"
 	// see here for display values: https://developer.mozilla.org/en-US/docs/CSS/display
 	rdisplayswap = /^(none|table(?!-c[ea]).+)/,
-	rnumsplit = new RegExp( "^(" + pnum + ")(.*)$", "i" ),
+	rnumsplit = new RegExp( "^(" + pnum + ")(.*)jQuery", "i" ),
 	rrelNum = new RegExp( "^([+-])=(" + pnum + ")", "i" ),
 
 	cssShow = { position: "absolute", visibility: "hidden", display: "block" },
@@ -6235,7 +6235,7 @@ jQuery.fx.step = {};
 var
 	fxNow, timerId,
 	rfxtypes = /^(?:toggle|show|hide)$/,
-	rfxnum = new RegExp( "^(?:([+-])=|)(" + pnum + ")([a-z%]*)$", "i" ),
+	rfxnum = new RegExp( "^(?:([+-])=|)(" + pnum + ")([a-z%]*)jQuery", "i" ),
 	rrun = /queueHooks$/,
 	animationPrefilters = [ defaultPrefilter ],
 	tweeners = {
@@ -6489,7 +6489,7 @@ function propFilter( props, specialEasing ) {
 			value = hooks.expand( value );
 			delete props[ name ];
 
-			// not quite $.extend, this wont overwrite keys already present.
+			// not quite jQuery.extend, this wont overwrite keys already present.
 			// also - reusing 'index' from above because we have the correct "name"
 			for ( index in value ) {
 				if ( !( index in props ) ) {
@@ -9160,12 +9160,12 @@ var
 	// Map over jQuery in case of overwrite
 	_jQuery = window.jQuery,
 
-	// Map over the $ in case of overwrite
-	_$ = window.$;
+	// Map over the jQuery in case of overwrite
+	_$ = window.jQuery;
 
 jQuery.noConflict = function( deep ) {
-	if ( window.$ === jQuery ) {
-		window.$ = _$;
+	if ( window.jQuery === jQuery ) {
+		window.jQuery = _$;
 	}
 
 	if ( deep && window.jQuery === jQuery ) {
@@ -9175,11 +9175,11 @@ jQuery.noConflict = function( deep ) {
 	return jQuery;
 };
 
-// Expose jQuery and $ identifiers, even in
+// Expose jQuery and jQuery identifiers, even in
 // AMD (#7102#comment:10, https://github.com/jquery/jquery/pull/557)
 // and CommonJS for browser emulators (#13566)
 if ( typeof noGlobal === strundefined ) {
-	window.jQuery = window.$ = jQuery;
+	window.jQuery = window.jQuery = jQuery;
 }
 
 
